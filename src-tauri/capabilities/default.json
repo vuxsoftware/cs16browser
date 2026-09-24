@@ -1,0 +1,19 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Permissions the cs16browser window needs. Tauri v2 denies IPC by default. The frontend shows the window after mounting; the chrome uses close, minimize, toggle-maximize, drag, and resize dragging; scan events need listen and unlisten.",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
+    "core:window:allow-close",
+    "core:window:allow-show",
+    "core:window:allow-minimize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-start-dragging",
+    "core:window:allow-start-resize-dragging",
+    "updater:default",
+    "process:allow-restart"
+  ]
+}

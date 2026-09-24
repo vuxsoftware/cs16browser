@@ -1,0 +1,21 @@
+node_modules
+build
+.svelte-kit
+package
+coverage
+.fallow
+/src/lib/bindings.ts
+
+# Not part of the SvelteKit frontend the "frontend" quality gate covers.
+src-tauri
+docs
+scripts
+.github
+*.md
+
+# Hand-tuned pixel-for-pixel replica of the in-game browser's chrome; every
+# value and the column alignment of its comments are measured. Reformatting
+# would not change a value, but it would destroy that alignment for no
+# benefit — see AGENTS.md ("Copy the pixels in app.css; do not rationalise
+# them").
+/src/app.css

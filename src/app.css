@@ -1,0 +1,408 @@
+/* app.css — the CS 1.6 in-game server-browser chrome.
+ *
+ * Every number here is measured off two 1:1 captures of the real browser
+ * (1961x1316 and 1956x1317) and cross-checked against docs/gui-design.md. Where
+ * this file and that document disagree, the probes are newer: the doc's §2.2
+ * header size (15px/11px cap) and §5 checkbox box (17px) do not survive
+ * measurement, and §5.3's button geometry moved between the two captures
+ * because `Change filters` is a ToggleButton (see below).
+ *
+ * House rules:
+ *   - geometry in px, in the capture's own coordinates: the reference is a
+ *     640x480 VGUI dialog stretched by a non-uniform factor, so nothing lands
+ *     on a round grid. Copy the pixels; do not rationalise them.
+ *   - the bevel is border-top/left lit + border-bottom/right dark, never
+ *     box-shadow (which blurs under DPI scaling)
+ *   - no border-radius, no transitions: GoldSrc chrome is instantaneous
+ *   - Tahoma only, and only at the measured sizes. The column widths assume
+ *     its metrics; a webfont would silently reflow the list.
+ */
+
+@import "flag-icons/css/flag-icons.min.css";
+
+.world-flag { font-family: "Segoe UI Emoji", sans-serif; font-size: 18px; line-height: 1; }
+
+:root {
+  --list-bg:       #3e4637;  /* ListBG 62 70 55 124 */
+  --panel-bg:      #4c5844;  /* ControlBG 90 106 80 124 over ListBG */
+  --selection-bg:  #958831;  /* SelectionBG — selected row, armed menu item */
+  --inset:         #282e22;  /* SelectionBG2 — dark bevel */
+  --bevel-light:   #889180;  /* measured; BorderBright is a green placeholder */
+  --slider:        #5a6a50;  /* measured scrollbar thumb body */
+
+  --text:          #d8ded3;  /* ControlText / BaseText */
+  --text-bright:   #ffffff;  /* SelectedText */
+  --accent:        #c4b550;  /* BrightControlText */
+  --text-dim:      #a0aa95;  /* DimBaseText — dropdown values, status line */
+  --text-disabled: #758666;  /* DimListText */
+
+  --font: Tahoma, "MS Sans Serif", Verdana, sans-serif;
+
+  /* Measured by fitting rendered Tahoma against the captures' glyph columns:
+   * the list cells, the header and the dropdown values are 20px (`Players`
+   * measures 63px of ink — Tahoma 20px regular is 64), and every piece of
+   * chrome text is 26px (title cos 0.957, status 0.785, `Connect` 0.949).
+   * Nothing in the reference is bold. */
+  --fs-row:    20px;
+  --fs-chrome: 26px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--panel-bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--fs-row);
+  /* The reference is drawn aliased. Keep the crisp bitmap look. */
+  -webkit-font-smoothing: none;
+  text-rendering: geometricPrecision;
+  overflow: hidden;
+  cursor: default;
+  user-select: none;
+}
+
+/* ------------------------------------------------------------------ frame */
+/* Outer bright edge at x0/y0, dark inner edge at the far side. The bottom
+ * panel's height is the only thing the collapsed state changes: measured
+ * expanded panel top 974, collapsed panel top 1158 — and the button row keeps
+ * the same y in both (1179), so it is anchored to the viewport bottom. */
+.app {
+  --panel-h: 340px;             /* panel top at y974 */
+  position: absolute;
+  inset: 0;
+  background: var(--panel-bg);
+  /* Outer edge: lit along the top, dark on the bottom and right, absent on the
+   * left — measured, and it is what puts the list body's own lit rule at x15. */
+  border-top: 1px solid var(--bevel-light);
+  border-right: 1px solid var(--inset);
+  border-bottom: 1px solid var(--inset);
+  overflow: hidden;
+}
+.app.collapsed {
+  --panel-h: 156px;
+  /* The list takes the space the filter block gives up; the button row does not
+   * move, because it is anchored to the bottom in both states. */
+  --list-bottom: 157px;
+}
+
+/* -------------------------------------------------------------- tab strip */
+/* Geometry lives in TabStrip.svelte: the active face is y92..143 and 4px taller
+ * than the inactive ones (y96..143); faces sit at a 145px pitch from x15, text
+ * inset 12px. The frame's lit top rule at y143 runs under the inactive faces
+ * only, so the active tab merges with the frame below it. */
+
+/* The sheet frame: lit rule on the left (x15) and top (y143), dark on the right
+ * (x1945) and bottom (y1246). The list and the bottom panel sit inside it and
+ * share its left and right edges; the status line sits below it. Drawn over
+ * both, so it is only lines. */
+.frame {
+  position: absolute;
+  left: 15px; right: 16px; top: 143px; bottom: 69px;
+  border-top: 1px solid var(--bevel-light);
+  border-left: 1px solid var(--bevel-light);
+  border-right: 1px solid var(--inset);
+  border-bottom: 1px solid var(--inset);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ------------------------------------------------------------ server list */
+.listwrap {
+  position: absolute;
+  left: 15px; right: 16px; top: 159px;
+  bottom: var(--list-bottom, 340px);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Header strip: a dark rule at y159, a lit one at y160, the faces 161..194.
+ * Boundaries are a 1px dark + 1px lit pair at x44/45, 84/85, 116/117, 226/227,
+ * 1374/1375, 1598/1599, 1778/1779, 1904/1905, drawn in the header row only. */
+.header {
+  height: 36px;
+  flex: 0 0 36px;
+  display: flex;
+  align-items: center;
+  background: var(--panel-bg);
+  border-top: 1px solid var(--inset);
+  border-left: 1px solid var(--bevel-light);
+  box-shadow: inset 0 1px 0 0 var(--bevel-light);
+}
+/* The scrollbar's up button lives in the header row (measured x1908..1942,
+ * y160..195), with 2px of list fill between it and the frame. */
+.hgutter { flex: 0 0 37px; height: 100%; position: relative; background: var(--list-bg); }
+.hcell {
+  height: 100%;
+  display: flex; align-items: center;
+  font-size: var(--fs-row);
+  color: var(--text-bright);
+  white-space: nowrap;
+  overflow: hidden;
+  min-width: 0;
+  border-right: 1px solid var(--inset);
+  box-shadow: 1px 0 0 0 var(--bevel-light);
+}
+.hcell.center { justify-content: center; }
+.hcell.left   { padding-left: 7px; }
+.hcell.sortable { cursor: default; }
+.hcell .caret { margin-left: 6px; font-size: 11px; color: var(--text-dim); }
+/* Glyph colours, measured: the lock is a mid grey, the bots `B` a darker grey
+ * tile, the VAC shield near-white. Sizes come from Icon.svelte's ink boxes. */
+.password { color: #b5b8b0; }
+.bots svg { color: #9a9d95; }
+.secure { color: var(--text); }
+
+/* Scrollbar arrow buttons (list header, list body, Game Info's player table):
+ * a raised 35px-wide face with a light 18x10 triangle centred in it. */
+.sbtn {
+  position: absolute;
+  left: 0; width: 35px;
+  background: var(--panel-bg);
+  border-top: 1px solid var(--bevel-light);
+  border-left: 1px solid var(--bevel-light);
+  border-bottom: 1px solid var(--inset);
+  border-right: 1px solid var(--inset);
+  display: flex; align-items: center; justify-content: center;
+}
+.hgutter .sbtn { top: 0; bottom: 0; border-bottom: none; }
+.sbtn span {
+  width: 0; height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+}
+.sbtn.up span   { border-bottom: 10px solid #b0aeae; }
+.sbtn.down span { border-top: 10px solid #b0aeae; }
+
+/* The body: a dark 1px rule at y196, list fill from 197, then the scrollbar
+ * gutter — the last 36px of the body, with a 37px thumb inset 1px on its left. */
+.body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  background: var(--panel-bg);
+  border-top: 1px solid var(--inset);
+  border-left: 1px solid var(--bevel-light);
+  /* The list's right boundary: dark at x1945, panel from 1946. */
+  border-right: 1px solid var(--inset);
+}
+
+/* Rows: pitch 28px, first row box at y204 (so the scroll content is inset 7px),
+ * cap height 16px at y209..224 — a 20px line centred in the 28px box. */
+.row {
+  position: absolute;
+  left: 0; right: 0;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  color: var(--text);
+  font-size: var(--fs-row);
+  z-index: 0;
+}
+.row .cell { height: 100%; display: flex; align-items: center; overflow: hidden; min-width: 0; }
+.row .cell.center { justify-content: center; }
+.row .cell.left   { padding-left: 7px; }
+.row .cell svg { display: block; flex: 0 0 auto; }
+.row .name, .row .reason { text-overflow: ellipsis; }
+.row .cell:not(.name), .hcell:not(.grow) { flex-shrink: 0; }
+
+/* The selection band starts 5px inside the list (measured: list fill x16..20,
+ * band from x21) and runs to the scrollbar. */
+.row.selected { color: var(--text-bright); }
+.row.selected::before {
+  content: "";
+  position: absolute;
+  left: 5px; right: 0; top: 0; bottom: 0;
+  background: var(--selection-bg);
+  z-index: -1;
+}
+/* §7.1 — a banned row is not connectable. */
+.row.banned { cursor: default; }
+.row.banned .latency { color: var(--text-disabled); }
+
+/* ----------------------------------------------------------- filter block */
+/* The panel is anchored to the frame's bottom edge, so the button row keeps the
+ * same x and y in both states (measured: the same row at y1179 expanded and
+ * collapsed alike). --panel-h is measured from the viewport bottom: top y974
+ * expanded, y1158 collapsed. The panel itself stops at the frame (69px up);
+ * below the frame is only the status line. */
+.bottom {
+  position: absolute;
+  left: 16px; right: 17px; bottom: 70px;
+  height: calc(var(--panel-h) - 69px);
+  border-top: 1px solid var(--bevel-light);
+  background: var(--panel-bg);
+}
+
+/* Expanded: control boxes at x135 and x637, rows at y990 and y1050 (48px rows,
+ * 12px gap). Labels are right-aligned 10px short of their control, so `Game`
+ * and `Map` share a right edge, as do `Latency` and `Anti-cheat`. All filter
+ * text is chrome-sized (`Not secure` measures 18px of cap height). */
+.filtergrid {
+  position: absolute;
+  left: 0; top: 15px;
+  display: grid;
+  grid-template-columns: 447px 398px;
+  row-gap: 12px;
+  align-items: center;
+}
+.frow { display: flex; align-items: center; height: 48px; }
+.flabel {
+  width: 109px; flex: 0 0 109px;
+  margin-right: 10px;
+  font-size: var(--fs-chrome); color: var(--text);
+  text-align: right;
+  white-space: nowrap;
+}
+.flabel.wide { width: 163px; flex: 0 0 163px; margin-right: 11px; }
+
+/* Controls are sunken wells: dark top/left, lit bottom/right. */
+.dropdown, .fentry {
+  position: relative;
+  display: flex; align-items: center;
+  height: 48px;
+  background: var(--list-bg);
+  border-top: 1px solid var(--inset);
+  border-left: 1px solid var(--inset);
+  border-bottom: 1px solid var(--bevel-light);
+  border-right: 1px solid var(--bevel-light);
+  padding: 0 34px 0 3px;
+}
+.dropdown .value {
+  font-size: var(--fs-chrome);
+  color: var(--text-dim);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+/* The Map field is a text entry, not a combo: same well, bright text. */
+.fentry {
+  padding: 0 3px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--fs-chrome);
+  outline: none;
+  user-select: text;
+  cursor: text;
+}
+/* Measured: an 18x11 triangle whose right edge sits 9px from the box's. */
+.dropdown .arrow {
+  position: absolute; right: 9px; top: 50%;
+  transform: translateY(-50%);
+  width: 0; height: 0;
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+  border-top: 11px solid var(--text);
+}
+.dd-game  { width: 328px; }
+.dd-small { width: 224px; }
+/* An open control keeps its well and its value colour: measured at the
+ * Anti-cheat dropdown while its menu is up (interior #3e4637, value #a0aa95). */
+.dropdown.open { background: var(--list-bg); }
+
+/* Popup menu: panel colour, items 44px tall with no gap, dim text inset 6px,
+ * and the armed item a SelectionBG band with white text. Measured: the dropdown
+ * ends at y1097/1098, the menu's lit top border is at y1100, the armed band
+ * spans y1144..1187 (44 rows) and x638..860 (the dropdown's interior width). */
+.menu {
+  position: absolute;
+  z-index: 40;
+  background: var(--panel-bg);
+  border-top: 1px solid var(--bevel-light);
+  border-left: 1px solid var(--bevel-light);
+  border-bottom: 1px solid var(--inset);
+  border-right: 1px solid var(--inset);
+  padding: 1px;
+}
+.menu .item {
+  height: 44px;
+  display: flex; align-items: center;
+  padding: 0 7px;
+  font-size: var(--fs-chrome);
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.menu .item.armed { background: var(--selection-bg); color: var(--text-bright); }
+
+/* Checkboxes: box 32x32 at x892, labels at x942, pitch 48 (boxes measured at
+ * y990, 1038, 1086, 1134). The check glyph is white and the box face stays
+ * dark; only the label brightens to gold while checked. */
+.checks { position: absolute; left: 876px; top: 7px; }
+.check { display: flex; align-items: center; height: 48px; }
+/* The box frame is grey rather than the palette bevel, and the check is a white
+ * chevron — both measured off the reference, not derived from the scheme. */
+.check .box {
+  width: 32px; height: 32px; flex: 0 0 32px;
+  margin-right: 18px;
+  background: var(--list-bg);
+  border: 2px solid #828076;
+  display: flex; align-items: center; justify-content: center;
+  color: #f2f2f2;
+}
+.check .box svg { width: 22px; height: 15px; display: none; }
+.check.on .box svg { display: block; }
+.check .label { font-size: var(--fs-chrome); color: var(--text); white-space: nowrap; }
+.check.on .label { color: var(--accent); }
+.check.disabled .label { color: var(--text-disabled); }
+.check.disabled .box { opacity: 0.6; }
+
+/* --------------------------------------------------------------- buttons */
+/* The VGUI button: a raised face (lit top/left, dark bottom/right), white 26px
+ * label inset 12px from the left. Focus adds a black outer ring and a dotted
+ * rectangle inside the face; disabled labels are embossed (dark ink, lit
+ * shadow one pixel down-right) — all measured off `Refresh all` / `Connect`. */
+.vbtn {
+  position: relative;
+  height: 48px;
+  display: flex; align-items: center;
+  padding: 0 0 0 12px;
+  background: var(--panel-bg);
+  border-top: 1px solid var(--bevel-light);
+  border-left: 1px solid var(--bevel-light);
+  border-bottom: 1px solid var(--inset);
+  border-right: 1px solid var(--inset);
+  color: var(--text-bright);
+  font-family: var(--font);
+  font-size: var(--fs-chrome);
+  white-space: nowrap;
+  cursor: default;
+  outline: none;
+}
+.vbtn:active:not(:disabled) {
+  border-top-color: var(--inset); border-left-color: var(--inset);
+  border-bottom-color: var(--bevel-light); border-right-color: var(--bevel-light);
+}
+.vbtn:focus-visible { box-shadow: 0 0 0 1px #000; }
+.vbtn:focus-visible::after {
+  content: "";
+  position: absolute; inset: 3px;
+  border: 1px dotted #000;
+  pointer-events: none;
+}
+.vbtn:disabled { color: var(--inset); text-shadow: 1px 1px 0 #75806f; }
+
+/* Geometry lives in ButtonBar.svelte; this comment records the measurements:
+ * the row is anchored to the viewport bottom and keeps its y in both panel
+ * states (measured 1179..1226 expanded and collapsed alike); `Change filters`
+ * is a ToggleButton (DialogServerBrowser.res names it `Filter`) whose pressed
+ * state inverts its bevel and turns the label gold; divider colours differ per
+ * boundary (#282e22 before `Quick refresh` and `Connect`, #889180 before
+ * `Refresh all`). */
+
+/* ---------------------------------------------------------------- dialogs */
+/* Dialog chrome lives in Dialog.svelte; these are the bodies it hosts. */
+.mtext { padding: 16px; font-size: var(--fs-chrome); color: var(--text); line-height: 1.25; }
+
+/* Narrow windows: the Name column absorbs the loss first, then the filter
+ * block reflows so the dropdowns stay reachable. */
+@media (max-width: 1400px) {
+  .checks { left: auto; right: 16px; }
+}
+@media (max-width: 1150px) {
+  .filtergrid { grid-template-columns: 447px; row-gap: 6px; }
+  .checks { position: absolute; left: 44px; right: auto; top: 150px; }
+  .app { --panel-h: 420px; }
+}

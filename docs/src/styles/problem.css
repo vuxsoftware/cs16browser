@@ -1,0 +1,15 @@
+.problem-section { margin-top: 100px; background: var(--panel); border-block: 1px solid var(--line); }
+.problem-layout { display: grid; grid-template-columns: .95fr 1.05fr; align-items: start; gap: 10%; }
+.problem-copy { position: sticky; top: 34px; }
+.problem-copy h2 { max-width: 490px; }
+.problem-copy > p:not(.eyebrow) { max-width: 490px; margin-bottom: 0; color: var(--text); font-size: 17px; line-height: 1.7; }
+.problem-points { border-top: 1px solid var(--line); }
+.problem-points > div { padding: 20px 4px 22px; border-bottom: 1px solid var(--line); }
+.problem-points h3 { margin: 8px 0; }
+.problem-points p { max-width: 470px; margin: 0; color: var(--text); font-size: 15px; line-height: 1.65; }
+
+@media (max-width: 760px) {
+  .problem-section { margin-top: 68px; }
+  .problem-layout { grid-template-columns: 1fr; gap: 30px; }
+  .problem-copy { position: static; }
+}
