@@ -24,7 +24,8 @@
     "quality:frontend": "bun run format:check && bun run lint && bun run check && bun run test && bun run coverage && bun run fallow && node scripts/check-version.mjs && bun run site:check",
     "tauri": "tauri",
     "site": "node scripts/build-site.mjs",
-    "site:check": "node scripts/build-site.mjs --check"
+    "site:check": "node scripts/build-site.mjs --check",
+    "version:set": "node scripts/set-version.mjs"
   },
   "license": "GPL-3.0-or-later",
   "dependencies": {

@@ -14,17 +14,7 @@ jobs:
     needs: quality
     permissions:
       contents: write
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: windows-latest
-            args: '--bundles nsis'
-          - platform: ubuntu-22.04
-            args: '--bundles appimage'
-          - platform: macos-latest
-            args: '--bundles app'
-    runs-on: ${{ matrix.platform }}
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -32,11 +22,6 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: src-tauri
-      - name: Tauri Linux dependencies
-        if: matrix.platform == 'ubuntu-22.04'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf xdg-utils libfuse2
       - run: bun install --frozen-lockfile
       - run: node scripts/check-version.mjs
       - run: node scripts/check-release.mjs
@@ -53,7 +38,7 @@ jobs:
           releaseBody: 'Signed desktop installers and updater metadata are attached.'
           releaseDraft: true
           prerelease: false
-          args: ${{ matrix.args }}
+          args: --bundles nsis
 
   publish-release:
     needs: publish
@@ -61,7 +46,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Publish only after all platform bundles are uploaded
+      - name: Publish after the Windows bundle is uploaded
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}

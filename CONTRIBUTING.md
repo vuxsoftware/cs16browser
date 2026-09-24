@@ -46,9 +46,11 @@ Changes pushed to `docs/` on that branch update the site automatically. The site
 
 ## Publishing signed releases
 
-The updater endpoint in `src-tauri/tauri.conf.json` points at `github.com/vuxsoftware/cs16browser`. Before a release:
+The updater endpoint in `src-tauri/tauri.conf.json` points at `github.com/vuxsoftware/cs16browser`. The updater signing key is separate from a Windows code-signing certificate. Before a release:
 
-1. Add the private updater signing key as the `TAURI_SIGNING_PRIVATE_KEY` GitHub Actions secret. Keep a secure backup outside the repository. The matching public key is already in `tauri.conf.json`.
-2. Keep versions in `package.json`, `src-tauri/Cargo.toml`, and `src-tauri/tauri.conf.json` aligned, then push a matching `vX.Y.Z` tag.
+1. Back up the private updater key outside the repository (`~/.tauri/cs16browser.key` on the maintainer's machine). Its matching public key is in `tauri.conf.json`. Losing the private key prevents updates to builds that trust this public key.
+2. Add the **contents** of the private key as the `TAURI_SIGNING_PRIVATE_KEY` GitHub Actions repository secret. A path to the maintainer's local file will not exist on the GitHub runner. This key has no password, so `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` is not needed.
+3. Run `bun run version:set X.Y.Z` to update the frontend, Tauri, Rust crate, lockfile and native window title together. Push the release commit to `main`, then push a matching `vX.Y.Z` tag on that commit. A push to `main` runs quality checks; only the tag starts the installer and GitHub Release workflow.
+4. After CI publishes the release, install the NSIS bundle on a clean Windows 10 or 11 machine and verify first-run key setup, server discovery, Connect, and a manual update check. Check that the website Download button selects the installer.
 
-The release workflow checks these requirements, builds bundles, signs updater artifacts, and publishes `latest.json`. Installed builds verify signatures before applying an update. Operating-system code signing is separate from Tauri's updater signing.
+The release workflow builds the Windows NSIS installer, signs its updater artifact, and publishes `latest.json`. Installed builds verify signatures before applying an update. The Windows installer itself is not code-signed, so SmartScreen may warn.

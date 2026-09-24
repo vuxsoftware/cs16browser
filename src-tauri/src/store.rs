@@ -432,7 +432,11 @@ mod tests {
             ports: 100,
             condemned_at: 1,
         };
-        let prior = [old("198.51.100.1"), old("198.51.100.2"), old("198.51.100.3")];
+        let prior = [
+            old("198.51.100.1"),
+            old("198.51.100.2"),
+            old("198.51.100.3"),
+        ];
         let excluded: Vec<Ipv4Addr> = prior[..2].iter().map(|f| f.ip).collect();
         // .1 stayed excluded (no rows); .2 was excluded too but is listed
         // anyway; .3 was not excluded and its rows came back clean.

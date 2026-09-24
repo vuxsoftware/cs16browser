@@ -555,7 +555,12 @@ mod tests {
         assert!(g.try_acquire_interactive(EP, t + 4_000).is_allowed());
         assert!(g.try_acquire_interactive(EP, t + 6_000).is_allowed());
         let refused = g.try_acquire_interactive(EP, t + 7_500);
-        assert_eq!(refused, Verdict::TooSoon { retry_after_ms: 500 });
+        assert_eq!(
+            refused,
+            Verdict::TooSoon {
+                retry_after_ms: 500
+            }
+        );
         assert_eq!(refused.message(), "recently queried; retry in 1 s");
     }
 

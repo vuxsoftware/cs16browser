@@ -69,7 +69,11 @@ mod tests {
 
     #[test]
     fn a_lan_address_is_not_a_signpost() {
-        for name in ["LAN party 192.168.1.10", "Office 10.0.0.5:27015", "CGNAT 100.64.1.1"] {
+        for name in [
+            "LAN party 192.168.1.10",
+            "Office 10.0.0.5:27015",
+            "CGNAT 100.64.1.1",
+        ] {
             let a = analyze(&sample(name), &Context::default());
             assert!(a.reasons.is_empty(), "{name:?}: {:?}", a.reasons);
         }

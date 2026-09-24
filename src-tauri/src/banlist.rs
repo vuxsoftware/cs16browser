@@ -323,7 +323,8 @@ mod tests {
     /// empty name rather than a failed deserialize.
     #[test]
     fn ban_without_hostname_field_still_loads() {
-        let json = format!(r#"{{"entries":{{"{EP}":{{"reasons":["slots>32"],"banned_at":1000}}}}}}"#);
+        let json =
+            format!(r#"{{"entries":{{"{EP}":{{"reasons":["slots>32"],"banned_at":1000}}}}}}"#);
         let b: BanList = serde_json::from_str(&json).unwrap();
         assert_eq!(b.get(EP).unwrap().hostname, "");
     }

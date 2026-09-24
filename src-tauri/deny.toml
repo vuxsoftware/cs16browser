@@ -23,6 +23,7 @@
 # dependencies not shared by any other crates, would be ignored, as the target
 # list here is effectively saying which targets you are building for.
 targets = [
+    "x86_64-pc-windows-msvc",
     # The triple can be any string, but only the target triples built in to
     # rustc (as of 1.40) can be checked against actual config expressions
     #"x86_64-unknown-linux-musl",
@@ -118,7 +119,9 @@ ignore = [
 # the FSF guidance above before adding it — don't just widen the list.
 #
 # See https://spdx.org/licenses/ for the identifier syntax.
+[licenses]
 allow = [
+    "GPL-3.0-or-later",
     "MIT",
     "MIT-0",
     "Apache-2.0",

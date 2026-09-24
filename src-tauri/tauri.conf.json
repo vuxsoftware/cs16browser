@@ -45,7 +45,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDE4MzdDNEZCOUY3MTdGNTkKUldSWmYzR2YrOFEzR09SUFdrSGNIQWViVnBiZ0F6em9OTXBObkFDMnZpT05lOWFVd0xtWEthS2kK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDhCQjJDMTdBQTY5NjYwRDkKUldUWllKYW1lc0d5aTgwa2Q5OTc2UlRkZGhuVkpodnRYM1NTMEZZVXV4ZEt1L0dpQmRaN0paalkK",
       "endpoints": ["https://github.com/vuxsoftware/cs16browser/releases/latest/download/latest.json"],
       "windows": { "installMode": "passive" }
     }

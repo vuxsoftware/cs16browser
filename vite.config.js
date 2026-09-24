@@ -10,6 +10,7 @@ export default defineConfig(() => ({
   resolve: { conditions: ["browser"] },
   test: {
     environment: "jsdom",
+    pool: "vmThreads",
     include: ["src/**/*.test.ts"],
     coverage: {
       provider: "v8",

@@ -514,7 +514,9 @@ async fn recv_reply(
 ) -> Result<usize> {
     let deadline = Instant::now() + Duration::from_millis(timeout_ms);
     loop {
-        let left = deadline.saturating_duration_since(Instant::now()).as_millis() as u64;
+        let left = deadline
+            .saturating_duration_since(Instant::now())
+            .as_millis() as u64;
         if left == 0 {
             bail!("timeout");
         }
@@ -732,10 +734,7 @@ async fn challenged_request(
 pub fn parse_rules(buf: &[u8]) -> Result<Vec<(String, String)>> {
     let buf = strip_marker(buf);
     if buf.is_empty() || buf[0] != RULES_HEADER {
-        bail!(
-            "bad rules header: {:#x}",
-            buf.first().copied().unwrap_or(0)
-        );
+        bail!("bad rules header: {:#x}", buf.first().copied().unwrap_or(0));
     }
     let mut it = CStrIter::new(&buf[1..]);
     let count = it.read_u8()? as usize | (it.read_u8()? as usize) << 8;
@@ -837,7 +836,9 @@ pub fn bot_plugin(rules: &[(String, String)]) -> Option<String> {
     }
     rules
         .iter()
-        .find(|(k, v)| k.eq_ignore_ascii_case("bot_quota") && v.trim().parse::<f32>().is_ok_and(|q| q > 0.0))
+        .find(|(k, v)| {
+            k.eq_ignore_ascii_case("bot_quota") && v.trim().parse::<f32>().is_ok_and(|q| q > 0.0)
+        })
         .map(|_| "CZ bots".to_string())
 }
 
@@ -860,7 +861,10 @@ mod tests {
         pkt.extend_from_slice(&2u16.to_le_bytes());
         pkt.extend_from_slice(b"mp_timelimit\x0020\x00yb_version\x004.4.957\x00");
         let r = parse_rules(&pkt).unwrap();
-        assert_eq!(r, rules(&[("mp_timelimit", "20"), ("yb_version", "4.4.957")]));
+        assert_eq!(
+            r,
+            rules(&[("mp_timelimit", "20"), ("yb_version", "4.4.957")])
+        );
     }
 
     #[test]
@@ -881,8 +885,14 @@ mod tests {
             ("yb_version", "4.4.957"),
         ]);
         assert_eq!(bot_plugin(&live).as_deref(), Some("YaPB 4.4.957"));
-        assert_eq!(bot_plugin(&rules(&[("pb_bot_quota", "4")])).as_deref(), Some("PODBot"));
-        assert_eq!(bot_plugin(&rules(&[("bot_quota", "6")])).as_deref(), Some("CZ bots"));
+        assert_eq!(
+            bot_plugin(&rules(&[("pb_bot_quota", "4")])).as_deref(),
+            Some("PODBot")
+        );
+        assert_eq!(
+            bot_plugin(&rules(&[("bot_quota", "6")])).as_deref(),
+            Some("CZ bots")
+        );
         assert_eq!(bot_plugin(&rules(&[("bot_quota", "0")])), None);
         assert_eq!(bot_plugin(&rules(&[("amxmodx_version", "1.9")])), None);
     }
@@ -929,8 +939,12 @@ mod tests {
         std::thread::spawn(move || {
             let mut buf = [0u8; 256];
             let (_, peer) = server.recv_from(&mut buf).unwrap();
-            server.send_to(&info_reply(INFO_HEADER_GOLDSRC), peer).unwrap();
-            server.send_to(&info_reply(INFO_HEADER_SOURCE), peer).unwrap();
+            server
+                .send_to(&info_reply(INFO_HEADER_GOLDSRC), peer)
+                .unwrap();
+            server
+                .send_to(&info_reply(INFO_HEADER_SOURCE), peer)
+                .unwrap();
             let (_, peer) = server.recv_from(&mut buf).unwrap();
             server.send_to(&player_reply("alice"), peer).unwrap();
         });
@@ -976,10 +990,16 @@ mod tests {
             let mut buf = [0u8; 256];
             let (_, peer) = server.recv_from(&mut buf).unwrap();
             server
-                .send_to(&[0xFF, 0xFF, 0xFF, 0xFF, CHALLENGE_HEADER, 9, 9, 9, 9], peer)
+                .send_to(
+                    &[0xFF, 0xFF, 0xFF, 0xFF, CHALLENGE_HEADER, 9, 9, 9, 9],
+                    peer,
+                )
                 .unwrap();
             let (n, peer) = server.recv_from(&mut buf).unwrap();
-            assert_eq!(&buf[..n], &build_request(REQ_RULES, Some(i32::from_le_bytes([9; 4]))));
+            assert_eq!(
+                &buf[..n],
+                &build_request(REQ_RULES, Some(i32::from_le_bytes([9; 4])))
+            );
             let mut body = CONNECTIONLESS.to_vec();
             body.push(RULES_HEADER);
             body.extend_from_slice(&2u16.to_le_bytes());
