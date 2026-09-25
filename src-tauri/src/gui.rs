@@ -23,9 +23,8 @@ use std::time::{Duration, Instant};
 use tauri::{AppHandle, Manager, State};
 use tauri_specta::{collect_commands, collect_events, Builder, Event as _};
 
-/// The generated bindings the Svelte frontend imports. Exported at startup
-/// (debug and release alike): a Rust change to a DTO becomes a TypeScript
-/// error on the next run rather than a silent `undefined`.
+/// The generated bindings the Svelte frontend imports. Development runs
+/// regenerate them; release builds ship the already-built frontend assets.
 pub const BINDINGS_PATH: &str = "../src/lib/bindings.ts";
 
 /// Shared state managed by Tauri.
@@ -475,9 +474,9 @@ pub fn run() {
 
     let builder = specta_builder();
 
-    // Export on every build, not just debug: the bindings are a build artefact
-    // the frontend imports, and a release build that silently kept an old
-    // `bindings.ts` would be worse than a slightly slower startup.
+    // An installed release has no source tree at CARGO_MANIFEST_DIR. Writing
+    // bindings there would panic before Tauri can create the window.
+    #[cfg(debug_assertions)]
     export_bindings(&builder);
 
     tauri::Builder::default()
@@ -547,17 +546,8 @@ fn specta_builder() -> Builder<tauri::Wry> {
         .events(collect_events![Event])
 }
 
-/// Write `bindings.ts` only when its content changed.
-///
-/// An unconditional write touches the file on every launch; under
-/// `tauri dev` Vite hot-reloads the page for it, which remounts the app and
-/// starts another sweep. Exporting to a scratch file and comparing keeps the
-/// file (and its mtime) untouched unless a DTO really changed.
-fn export_bindings(builder: &Builder<tauri::Wry>) {
-    let target = std::path::Path::new(concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/../src/lib/bindings.ts"
-    ));
+#[cfg(any(debug_assertions, test))]
+fn generated_bindings(builder: &Builder<tauri::Wry>) -> Vec<u8> {
     let scratch =
         std::env::temp_dir().join(format!("cs16browser-bindings-{}.ts", std::process::id()));
     builder
@@ -565,8 +555,17 @@ fn export_bindings(builder: &Builder<tauri::Wry>) {
         .expect("failed to export the TypeScript bindings");
     let fresh = std::fs::read(&scratch).expect("failed to read the exported bindings");
     let _ = std::fs::remove_file(&scratch);
-    if std::fs::read(target).ok().as_deref() != Some(fresh.as_slice()) {
-        std::fs::write(target, fresh).expect("failed to write the TypeScript bindings");
+    fresh
+}
+
+/// Development runs update the generated bindings only when they change, so
+/// Vite does not remount the app after every launch.
+#[cfg(debug_assertions)]
+fn export_bindings(builder: &Builder<tauri::Wry>) {
+    let target = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(BINDINGS_PATH);
+    let fresh = generated_bindings(builder);
+    if std::fs::read(&target).ok().as_deref() != Some(fresh.as_slice()) {
+        std::fs::write(&target, fresh).expect("failed to write the TypeScript bindings");
     }
 }
 
@@ -576,7 +575,13 @@ mod tests {
 
     #[test]
     fn generated_bindings_match_commands() {
-        export_bindings(&specta_builder());
+        let target = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(BINDINGS_PATH);
+        let committed = std::fs::read(&target).expect("failed to read committed bindings");
+        assert_eq!(
+            committed,
+            generated_bindings(&specta_builder()),
+            "generated bindings are stale; run the debug app to regenerate them"
+        );
     }
 
     #[test]
