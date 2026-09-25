@@ -30,7 +30,6 @@ vite.config.ts.timestamp-*
 # Rust and Tauri generated output
 /src-tauri/target/
 /src-tauri/gen/schemas/
-/src-tauri/data/
 
 # Runtime discovery, settings, and scan state (may contain an API key)
 /cs16browser-state.json
