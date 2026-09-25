@@ -1,0 +1,6 @@
+# Runtime data the app writes next to its working directory. `tauri dev`
+# watches src-tauri/ and rebuilds + relaunches on any change, so without this
+# every sweep's state write restarted the app, which swept and wrote again.
+cs16browser-state.json
+cs16browser-state.json.tmp
+cs16browser-data/

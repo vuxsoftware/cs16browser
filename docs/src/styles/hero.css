@@ -1,0 +1,25 @@
+.hero { padding-top: 92px; text-align: center; }
+.hero-copy { max-width: 850px; margin-inline: auto; }
+.status-light { display: inline-block; width: 7px; height: 7px; margin-right: 8px; background: var(--accent); vertical-align: 1px; }
+h1 { margin-bottom: 23px; font-size: clamp(48px, 6vw, 78px); letter-spacing: -.065em; }
+h1 span { color: var(--accent); }
+.hero-lede { max-width: 640px; margin: 0 auto 28px; color: var(--muted); font-size: 18px; line-height: 1.65; }
+.hero-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 11px; }
+.hero-meta { margin: 14px 0 0; color: var(--muted); font-size: 12px; }
+.app-showcase { margin: 64px auto 0; max-width: 1070px; }
+.screenshot-frame { padding: 8px; background: var(--panel); border-top: 1px solid var(--line); border-left: 1px solid var(--line); border-right: 2px solid var(--dark-line); border-bottom: 2px solid var(--dark-line); box-shadow: 17px 20px 0 #1b2118; }
+.screenshot-frame img { width: 100%; height: auto; background: var(--list); }
+.screenshot-caption { margin-top: 15px; color: var(--muted); font-size: 12px; }
+
+@media (max-width: 760px) {
+  .hero { padding-top: 64px; }
+  h1 { font-size: clamp(40px, 9vw, 64px); }
+  .hero-lede { font-size: 16px; }
+  .app-showcase { margin-top: 44px; }
+  .screenshot-frame { box-shadow: 7px 9px 0 #1b2118; padding: 4px; }
+}
+@media (max-width: 520px) {
+  .hero { padding-top: 48px; }
+  h1 { font-size: 40px; }
+  .hero-actions .button { flex: 1 1 100%; }
+}

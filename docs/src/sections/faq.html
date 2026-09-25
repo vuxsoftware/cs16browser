@@ -1,0 +1,34 @@
+      <section class="section faq-section" id="faq" aria-labelledby="faq-title">
+        <div class="shell faq-layout">
+          <div>
+            <p class="eyebrow">03 / FAQ</p>
+            <h2 id="faq-title">Before you install.</h2>
+          </div>
+          <div class="faq-list">
+            <details>
+              <summary>Why does it need a Steam Web API key?</summary>
+              <p>Steam only gives out the full server list through its Web API, and that requires a key. Getting one is free and takes a minute: sign in on <a href="https://steamcommunity.com/dev/apikey">Steam's API key page</a>, enter any domain name (<code>localhost</code> is fine) and copy the key. Steam doesn't give keys to limited accounts.</p>
+            </details>
+            <details>
+              <summary>What does the app send, and where?</summary>
+              <p>Your key, favorites, history and settings are stored on your PC. The key is sent only to Steam, to fetch the server list. The app then contacts each game server to check it, and GitHub to look for updates. You can turn the update check off in Settings. There's no account and no tracking.</p>
+            </details>
+            <details>
+              <summary>Do I need Counter-Strike 1.6 installed?</summary>
+              <p>You can browse without it. To join a server you need Steam and Counter-Strike 1.6 in your library, because joining goes through Steam, just like it does from the game's own browser.</p>
+            </details>
+            <details id="smartscreen">
+              <summary>Windows says it protected my PC. Is the installer safe?</summary>
+              <p>The installer isn't signed with a paid code-signing certificate yet, so SmartScreen doesn't recognize it. Click <b>More info</b>, then <b>Run anyway</b>. The source code is public, and GitHub builds every release straight from it.</p>
+            </details>
+            <details>
+              <summary>Won't all those checks flood the servers?</summary>
+              <p>No. If a server answered in the last minute, the app reuses that answer. No server gets more than three queries a minute, and servers that keep timing out are left alone for a while.</p>
+            </details>
+            <details>
+              <summary>Is it really free?</summary>
+              <p>Yes. It's open source under the GPL-3.0 license, with no ads and no sign-up.</p>
+            </details>
+          </div>
+        </div>
+      </section>

@@ -1,0 +1,12 @@
+.feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 13px; }
+.feature { padding: 22px; background: var(--list); }
+.feature-symbol { display: block; margin-bottom: 20px; color: var(--accent); font-size: 28px; line-height: 1; }
+.feature h3 { font-size: 19px; }
+.feature p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.65; }
+
+@media (max-width: 900px) {
+  .feature-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 560px) {
+  .feature-grid { grid-template-columns: 1fr; }
+}

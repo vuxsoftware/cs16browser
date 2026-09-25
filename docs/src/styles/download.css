@@ -1,0 +1,19 @@
+.download-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 8%; align-items: center; padding: 53px; background: var(--panel); border-right-width: 2px; border-bottom-width: 2px; }
+.download-main h2 { max-width: 460px; margin-bottom: 28px; }
+.button-large { min-height: 52px; padding-inline: 24px; font-size: 16px; }
+.download-meta { margin: 12px 0 0; color: var(--text); font-size: 13px; }
+.download-source { margin: 28px 0 0; color: var(--muted); font-size: 13px; }
+.download-source a, .install-steps a { color: var(--accent); text-underline-offset: 3px; }
+
+.install-steps { margin: 0; padding: 0; list-style: none; counter-reset: step; border-top: 1px solid var(--line); }
+.install-steps li { position: relative; padding: 18px 0 18px 52px; border-bottom: 1px solid var(--line); counter-increment: step; }
+.install-steps li::before { content: counter(step, decimal-leading-zero); position: absolute; left: 0; top: 19px; color: var(--accent); font-size: 13px; font-weight: 700; letter-spacing: .12em; }
+.install-steps h3 { margin-bottom: 4px; font-size: 18px; }
+.install-steps p { margin: 0; color: var(--text); font-size: 14px; line-height: 1.6; }
+
+@media (max-width: 760px) {
+  .download-panel { grid-template-columns: 1fr; gap: 34px; padding: 28px; }
+}
+@media (max-width: 520px) {
+  .button-large { width: 100%; }
+}

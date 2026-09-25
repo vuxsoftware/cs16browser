@@ -1,0 +1,40 @@
+# Dependencies and generated frontend output
+/node_modules/
+/build/
+/.svelte-kit/
+/package/
+/coverage/
+/.fallow/
+/.tmp/
+
+# Local configuration and private updater signing keys
+/.env
+/.env.*
+!/.env.example
+!/.env.sample
+/.local/
+
+# Editor and operating-system files
+/.vscode/
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*~
+
+# Build tools
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+*.log
+
+# Rust and Tauri generated output
+/src-tauri/target/
+/src-tauri/gen/schemas/
+
+# Runtime discovery, settings, and scan state (may contain an API key)
+/cs16browser-state.json
+/cs16browser-state.json.tmp
+/cs16browser-data/
+/src-tauri/cs16browser-state.json
+/src-tauri/cs16browser-state.json.tmp
+/src-tauri/cs16browser-data/
